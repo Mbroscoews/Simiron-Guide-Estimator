@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#124d7f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Simiron Estimator" />
+  <title>Simiron Estimator PWA</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <style>
+    :root {
+      --simiron-blue: #124d7f;
+      --simiron-blue-dark: #0b3557;
+      --simiron-orange: #f58220;
+      --simiron-bg: #edf3f8;
+      --simiron-border: #d7e0e8;
+      --simiron-text: #1f2a37;
+      --simiron-muted: #667686;
+      --white: #ffffff;
+      --success-bg: #edf8f1;
+      --success-border: #cfe7d6;
+      --success-text: #275c3a;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, var(--simiron-bg), #ffffff);
+      color: var(--simiron-text);
+    }
+    body { padding: 12px; }
+    .app {
+      max-width: 860px;
+      margin: 0 auto;
+      background: var(--white);
+      border: 1px solid var(--simiron-border);
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: 0 10px 28px rgba(11, 53, 87, 0.12);
+    }
+    .header {
+      background: linear-gradient(135deg, var(--simiron-blue-dark), var(--simiron-blue));
+      color: #fff;
+      padding: 18px 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo {
+      width: 54px; height: 54px; border-radius: 14px; background: #fff; color: var(--simiron-blue-dark);
+      display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 28px; flex: 0 0 auto;
+    }
+    .header h1 { margin: 0 0 4px; font-size: 1.3rem; }
+    .header p { margin: 0; font-size: 0.95rem; line-height: 1.4; opacity: 0.96; }
+    .content { padding: 14px; }
+    .controls, .toolbar {
+      display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 14px;
+    }
+    .field label {
+      display: block; margin-bottom: 7px; font-size: 0.95rem; font-weight: 700; color: var(--simiron-blue-dark);
+    }
+    .field input, .field select, .field button {
+      display: block; width: 100%; min-height: 56px; border: 1px solid var(--simiron-border);
+      border-radius: 14px; padding: 14px 16px; font-size: 16px; background: #fff; color: var(--simiron-text);
+      outline: none;
+    }
+    .field button, .action-btn {
+      cursor: pointer; background: var(--simiron-orange); color: #fff; border: none; font-weight: 800;
+      box-shadow: 0 6px 16px rgba(245,130,32,0.25);
+    }
+    .field button.secondary, .action-btn.secondary {
+      background: #fff; color: var(--simiron-blue-dark); border: 1px solid var(--simiron-border); box-shadow: none;
+    }
+    .field input:focus, .field select:focus {
+      border-color: var(--simiron-orange); box-shadow: 0 0 0 3px rgba(245,130,32,0.18);
+    }
+    .badges { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+    .badge {
+      background: rgba(245,130,32,0.12); color: var(--simiron-blue-dark); border: 1px solid rgba(245,130,32,0.25);
+      border-radius: 999px; padding: 8px 12px; font-size: 0.92rem; font-weight: 700;
+    }
+    .summary {
+      background: #fffaf4; border: 1px solid rgba(245,130,32,0.24); border-radius: 16px; padding: 14px; margin-bottom: 14px;
+    }
+    .summary-title { font-size: 0.95rem; font-weight: 800; color: var(--simiron-blue-dark); margin-bottom: 6px; }
+    .summary-value { font-size: 1.8rem; font-weight: 900; color: var(--simiron-orange); line-height: 1.05; margin-bottom: 8px; }
+    .summary-note { font-size: 0.92rem; line-height: 1.45; color: var(--simiron-muted); }
+    .empty, .install-box {
+      background: var(--success-bg); border: 1px solid var(--success-border); border-radius: 16px; padding: 14px; color: var(--success-text);
+    }
+    .results, .editor-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .card {
+      background: #fff; border: 1px solid var(--simiron-border); border-radius: 18px; padding: 14px; box-shadow: 0 4px 14px rgba(11,53,87,0.05);
+    }
+    .card h3 { margin: 0 0 10px; font-size: 1rem; line-height: 1.35; color: var(--simiron-blue-dark); }
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat { background: #f7fafc; border: 1px solid #e7eef4; border-radius: 12px; padding: 10px; }
+    .stat-label { font-size: 0.78rem; color: var(--simiron-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+    .stat-value { font-size: 0.98rem; font-weight: 800; line-height: 1.3; }
+    .secondary-box {
+      margin-top: 10px; border: 1px dashed #c9d5e2; border-radius: 12px; padding: 10px; background: #fbfdff; font-size: 0.92rem; line-height: 1.45; color: var(--simiron-muted);
+    }
+    .editor-card { border: 1px solid var(--simiron-border); border-radius: 16px; padding: 12px; background: #fbfdff; }
+    .editor-card h4 { margin: 0 0 10px; color: var(--simiron-blue-dark); }
+    .mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .footer { margin-top: 14px; font-size: 0.9rem; color: var(--simiron-muted); line-height: 1.45; }
+    .hidden { display: none; }
+    @media (min-width: 720px) {
+      body { padding: 20px; }
+      .controls { grid-template-columns: 1.2fr 0.8fr; }
+      .toolbar { grid-template-columns: repeat(3, 1fr); }
+      .results { grid-template-columns: 1fr 1fr; }
+      .editor-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div class="brand">
+        <div class="logo">S</div>
+        <div>
+          <h1>Simiron System Estimator</h1>
+          <p>Editable coverage rates, mobile-friendly controls, and installable app behavior for phone home screens.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div id="installHelp" class="install-box">
+        <strong>Install on phone:</strong> open this on your hosted site, then use <strong>Add to Home Screen</strong> in Chrome or Safari. On supported devices, the install button below will appear automatically.
+      </div>
+
+      <div class="toolbar">
+        <button id="installBtn" class="action-btn hidden">Install App</button>
+        <button id="editBtn" class="action-btn secondary">Edit Coverage Rates</button>
+        <button id="resetBtn" class="action-btn secondary">Reset Defaults</button>
+      </div>
+
+      <div class="controls">
+        <div class="field">
+          <label for="systemSelect">System</label>
+          <select id="systemSelect"></select>
+        </div>
+        <div class="field">
+          <label for="measureInput" id="measureLabel">Square Feet</label>
+          <input id="measureInput" type="number" inputmode="decimal" min="0" step="any" placeholder="Enter square feet" />
+        </div>
+      </div>
+
+      <div class="badges">
+        <div class="badge" id="unitBadge">Unit: Sqft</div>
+        <div class="badge" id="productCountBadge">Products: 0</div>
+        <div class="badge">Coverage Editable</div>
+      </div>
+
+      <div id="editorPanel" class="hidden"></div>
+      <div id="summary"></div>
+      <div id="results"></div>
+
+      <div class="footer">
+        Coverage values are saved on the device in local storage. To install as an app, host these files on Netlify or GitHub Pages, then add the site to the home screen.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const defaultSystems = [{"id":"simflake-sb-epoxy","name":"Simflake SB 1-day & 2-day Epoxy System","unit":"Sqft","inputLabel":"Square Feet","products":[{"name":"Base 1150FC & 1100SL 3 gallon","coverage":420,"uom":"kits"},{"name":"Flake 40# Box 1/4\"","coverage":240,"uom":"boxes"},{"name":"Topcoat Polyaspartic 2 gallon","coverage":240,"uom":"kits"},{"name":"Topcoat Polyaspartic 10 gallon","coverage":1200,"uom":"kits"}]},{"id":"simflake-sbuv-polyaspartic","name":"Simflake SB/UV 1-day Polyaspartic System","unit":"Sqft","inputLabel":"Square Feet","products":[{"name":"Base Polyaspartic 2 gallon","coverage":280,"uom":"kits"},{"name":"Base Polyaspartic 10 gallon","coverage":1400,"uom":"kits"},{"name":"U-tint","coverage":280,"uom":"units"},{"name":"Flake 40# Box 1/4\"","coverage":240,"uom":"boxes"},{"name":"Topcoat Polyaspartic 2 gallon","coverage":240,"uom":"kits"},{"name":"Topcoat Polyaspartic 10 gallon","coverage":1200,"uom":"kits"}]},{"id":"simflake-polyurea","name":"Simflake Polyurea SB 1-day Polyurea System","unit":"Sqft","inputLabel":"Square Feet","products":[{"name":"Base Polyurea 1.5 gallon","coverage":330,"uom":"kits"},{"name":"Base Polyurea 15 gallon","coverage":3300,"uom":"kits"},{"name":"Flake 40# Box 1/4\"","coverage":240,"uom":"boxes"},{"name":"Topcoat Polyaspartic 2 gallon","coverage":240,"uom":"kits"},{"name":"Topcoat Polyaspartic 10 gallon","coverage":1200,"uom":"kits"}]},{"id":"simflake-rb","name":"Simflake RB 1-day & 2-day System","unit":"Sqft","inputLabel":"Square Feet","products":[{"name":"Base 1150FC & 1100SL 3 gallon","coverage":420,"uom":"kits"},{"name":"Flake 40# Box 1/4\"","coverage":1000,"uom":"boxes"},{"name":"Topcoat 971 1 gallon","coverage":400,"uom":"gallons"}]},{"id":"simflake-sb-moisture","name":"Simflake SB Moisture System","unit":"Sqft","inputLabel":"Square Feet","products":[{"name":"Base 1150FC & MVB","coverage":300,"uom":"kits"},{"name":"U-tint 1150FC clear & MVB clear","coverage":300,"uom":"units"},{"name":"Flake 40# Box 1/4\"","coverage":180,"uom":"boxes"},{"name":"Topcoat Polyaspartic 2 gallon","coverage":240,"uom":"kits"},{"name":"Topcoat Polyaspartic 10 gallon","coverage":1200,"uom":"kits"}]},{"id":"simfloor-metallic","name":"Simfloor Metallic System","unit":"Sqft","inputLabel":"Square Feet","products":[{"name":"Primer 1150FC & 1100SL 3 gallon","coverage":750,"uom":"kits"},{"name":"Base 1150FC & 1100SL 3 gallon","coverage":420,"uom":"kits"},{"name":"Primer/Base MVB 3 gallon","coverage":300,"uom":"kits"},{"name":"U-tint MVB","coverage":300,"uom":"units"},{"name":"Metallic Epoxy & Metallic Pigment 32 oz.","coverage":100,"uom":"kits"},{"name":"Topcoat Cerafin Gloss 1 gallon","coverage":535,"uom":"gallons"},{"name":"Topcoat 971 Satin 1 gallon","coverage":500,"uom":"gallons"},{"name":"Topcoat High-Wear Urethane 1 gallon","coverage":600,"uom":"gallons"}]},{"id":"simfloor-highwear","name":"Simfloor High-Wear Urethane System","unit":"Sqft","inputLabel":"Square Feet","products":[{"name":"Primer 1150FC & 1100SL 3 gallon","coverage":750,"uom":"kits"},{"name":"Base 1100SL 3 gallon","coverage":300,"uom":"kits"},{"name":"Topcoat High-Wear Urethane 1 gallon","coverage":600,"uom":"gallons"},{"name":"U-tint for HWU/ESD Filler","coverage":600,"uom":"units"}]},{"id":"simcrete-sl","name":"Simcrete SL Flake / Silica Sand / Quartz","unit":"Sqft","inputLabel":"Square Feet","products":[{"name":"Base Simcrete A&B 10 gallon","coverage":250,"uom":"kits"},{"name":"SL 20# Filler Bag","coverage":25,"uom":"bags"},{"name":"U-tint","coverage":50,"uom":"units"},{"name":"Flake 40# Box 1/4\"","coverage":240,"uom":"boxes"},{"name":"Simsand/Quartz","coverage":37.5,"uom":"bags"},{"name":"Topcoat Polyaspartic 2 gallon","coverage":240,"uom":"kits"},{"name":"Topcoat Polyaspartic 10 gallon","coverage":1200,"uom":"kits"},{"name":"U-tint if topcoat is tinted","coverage":240,"uom":"units"}]},{"id":"cove-kit","name":"4\" Cove Kit & Recipe","unit":"Linear Feet","inputLabel":"Linear Feet","products":[{"name":"Cove Kit","coverage":35,"uom":"kits"},{"name":"1150FC & 1100SL","coverage":180,"uom":"kits"},{"name":"Simsand/Quartz","coverage":45,"uom":"bags"}]},{"id":"simsand-quartz-db","name":"Simsand / Quartz DB Epoxy System","unit":"Sqft","inputLabel":"Square Feet","products":[{"name":"Base 1150FC & 1100SL","coverage":420,"uom":"kits"},{"name":"Simsand/Quartz SB (base broadcast)","coverage":100,"uom":"bags"},{"name":"Intermediate 1150FC & 1100SL","coverage":360,"uom":"kits"},{"name":"Intermediate Polyaspartic 2 gallon","coverage":240,"uom":"kits"},{"name":"Intermediate Polyaspartic 10 gallon","coverage":1200,"uom":"kits"},{"name":"Simsand/Quartz SB (intermediate broadcast)","coverage":100,"uom":"bags"},{"name":"Topcoat Polyaspartic 2 gallon","coverage":240,"uom":"kits"},{"name":"Topcoat Polyaspartic 10 gallon","coverage":1200,"uom":"kits"},{"name":"U-tint if topcoat is tinted","coverage":240,"uom":"units"}]},{"id":"cure-seal","name":"Cure & Seal","unit":"Sqft","inputLabel":"Square Feet","products":[{"name":"Cure & Seal single coat (300 sqft/gal)","coverage":1500,"uom":"5-gal pails"},{"name":"Cure & Seal with two coats","coverage":750,"uom":"5-gal pails"}]},{"id":"polishing-densifier-guard","name":"Polishing Densifier / Guard","unit":"Sqft","inputLabel":"Square Feet","products":[{"name":"Simhard 5 gallon","coverage":3250,"uom":"pails"},{"name":"Simguard 5 gallon","coverage":3250,"uom":"pails"}]},{"id":"860jf","name":"860JF","unit":"Linear Feet","inputLabel":"Linear Feet","products":[{"name":"1/4\" x 1/4\"","coverage":32,"uom":"cartridges","secondaryCoverage":2490,"secondaryName":"10 gallon A&B/U-tint","secondaryUom":"kits"},{"name":"1/4\" x 1/2\"","coverage":24,"uom":"cartridges","secondaryCoverage":1380,"secondaryName":"10 gallon A&B/U-tint","secondaryUom":"kits"},{"name":"1/4\" x 3/4\"","coverage":16,"uom":"cartridges","secondaryCoverage":920,"secondaryName":"10 gallon A&B/U-tint","secondaryUom":"kits"},{"name":"1/4\" x 1\"","coverage":11,"uom":"cartridges","secondaryCoverage":640,"secondaryName":"10 gallon A&B/U-tint","secondaryUom":"kits"},{"name":"1/2\" x 1/2\"","coverage":11,"uom":"cartridges","secondaryCoverage":690,"secondaryName":"10 gallon A&B/U-tint","secondaryUom":"kits"},{"name":"1/2\" x 3/4\"","coverage":8,"uom":"cartridges","secondaryCoverage":450,"secondaryName":"10 gallon A&B/U-tint","secondaryUom":"kits"},{"name":"1/2\" x 1\"","coverage":6,"uom":"cartridges","secondaryCoverage":340,"secondaryName":"10 gallon A&B/U-tint","secondaryUom":"kits"},{"name":"3/4\" x 3/4\"","coverage":5,"uom":"cartridges","secondaryCoverage":300,"secondaryName":"10 gallon A&B/U-tint","secondaryUom":"kits"},{"name":"3/4\" x 1\"","coverage":3,"uom":"cartridges","secondaryCoverage":230,"secondaryName":"10 gallon A&B/U-tint","secondaryUom":"kits"},{"name":"1/4\" x 2\" Full Depth","coverage":null,"uom":"cartridges","secondaryCoverage":320,"secondaryName":"10 gallon A&B/U-tint","secondaryUom":"kits"},{"name":"1/2\" x 2\" Full Depth","coverage":null,"uom":"cartridges","secondaryCoverage":170,"secondaryName":"10 gallon A&B/U-tint","secondaryUom":"kits"},{"name":"3/4\" x 2\" Full Depth","coverage":null,"uom":"cartridges","secondaryCoverage":110,"secondaryName":"10 gallon A&B/U-tint","secondaryUom":"kits"},{"name":"1\" x 2\" Full Depth","coverage":null,"uom":"cartridges","secondaryCoverage":80,"secondaryName":"10 gallon A&B/U-tint","secondaryUom":"kits"}]}];
+
+    const STORAGE_KEY = 'simiron-pwa-systems-v1';
+    let deferredPrompt = null;
+
+    const systemSelect = document.getElementById('systemSelect');
+    const measureInput = document.getElementById('measureInput');
+    const measureLabel = document.getElementById('measureLabel');
+    const unitBadge = document.getElementById('unitBadge');
+    const productCountBadge = document.getElementById('productCountBadge');
+    const summary = document.getElementById('summary');
+    const results = document.getElementById('results');
+    const editorPanel = document.getElementById('editorPanel');
+    const editBtn = document.getElementById('editBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const installBtn = document.getElementById('installBtn');
+
+    function loadSystems() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultSystems));
+      } catch (e) {
+        return JSON.parse(JSON.stringify(defaultSystems));
+      }
+    }
+
+    let systems = loadSystems();
+
+    function saveSystems() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(systems));
+    }
+
+    function ceilUnits(amount, coverage) {
+      if (!coverage || !amount || amount <= 0) return null;
+      return Math.ceil(amount / coverage);
+    }
+
+    function formatNumber(value, maxDecimals = 2) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return '—';
+      return n.toLocaleString(undefined, { maximumFractionDigits: maxDecimals });
+    }
+
+    function fillSystems() {
+      systemSelect.innerHTML = systems.map((s, i) => `<option value="${i}">${s.name}</option>`).join('');
+    }
+
+    function renderEditor(selectedIndex) {
+      const selected = systems[selectedIndex] || systems[0];
+      const cards = selected.products.map((item, idx) => `
+        <div class="editor-card">
+          <h4>${item.name}</h4>
+          <div class="mini-grid">
+            <div class="field">
+              <label>Coverage</label>
+              <input type="number" step="any" min="0" value="${item.coverage ?? ''}" data-role="coverage" data-index="${idx}" />
+            </div>
+            <div class="field">
+              <label>Unit of Measure</label>
+              <input type="text" value="${item.uom || ''}" data-role="uom" data-index="${idx}" />
+            </div>
+          </div>
+          ${item.secondaryName ? `
+            <div class="mini-grid">
+              <div class="field">
+                <label>Secondary Coverage</label>
+                <input type="number" step="any" min="0" value="${item.secondaryCoverage ?? ''}" data-role="secondaryCoverage" data-index="${idx}" />
+              </div>
+              <div class="field">
+                <label>Secondary UOM</label>
+                <input type="text" value="${item.secondaryUom || ''}" data-role="secondaryUom" data-index="${idx}" />
+              </div>
+            </div>` : ''}
+        </div>`).join('');
+
+      editorPanel.innerHTML = `<div class="summary"><div class="summary-title">Edit Coverage Rates</div><div class="summary-note">Change any coverage value below. Updates save on this device automatically.</div></div><div class="editor-grid">${cards}</div>`;
+
+      editorPanel.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const index = Number(e.target.dataset.index);
+          const role = e.target.dataset.role;
+          const value = role.toLowerCase().includes('uom') ? e.target.value : (e.target.value === '' ? null : Number(e.target.value));
+          systems[selectedIndex].products[index][role] = value;
+          saveSystems();
+          render();
+        });
+      });
+    }
+
+    function renderEmpty(selected) {
+      summary.innerHTML = `<div class="summary"><div class="summary-title">Selected System</div><div class="summary-value" style="font-size:1.15rem;color:var(--simiron-blue-dark);line-height:1.25;">${selected.name}</div><div class="summary-note">Enter your ${selected.inputLabel.toLowerCase()} to calculate material quantities.</div></div>`;
+      results.innerHTML = `<div class="empty">Enter a ${selected.inputLabel.toLowerCase()} amount to see the estimator output.</div>`;
+    }
+
+    function render() {
+      const selectedIndex = Number(systemSelect.value || 0);
+      const selected = systems[selectedIndex] || systems[0];
+      const amount = parseFloat(measureInput.value);
+
+      measureLabel.textContent = selected.inputLabel;
+      measureInput.placeholder = 'Enter ' + selected.inputLabel.toLowerCase();
+      unitBadge.textContent = 'Unit: ' + selected.unit;
+      productCountBadge.textContent = 'Products: ' + selected.products.length;
+
+      if (!editorPanel.classList.contains('hidden')) {
+        renderEditor(selectedIndex);
+      }
+
+      if (!Number.isFinite(amount) || amount <= 0) {
+        renderEmpty(selected);
+        return;
+      }
+
+      summary.innerHTML = `<div class="summary"><div class="summary-title">Project Input</div><div class="summary-value">${formatNumber(amount, 2)} ${selected.unit}</div><div class="summary-note">System: <strong>${selected.name}</strong></div></div>`;
+
+      results.innerHTML = `<div class="results">${selected.products.map(item => {
+        const primaryQty = ceilUnits(amount, item.coverage);
+        const secondaryQty = ceilUnits(amount, item.secondaryCoverage);
+        return `<div class="card"><h3>${item.name}</h3><div class="stats"><div class="stat"><div class="stat-label">Coverage</div><div class="stat-value">${item.coverage ? formatNumber(item.coverage, 2) + ' ' + selected.unit + ' / ' + item.uom : '—'}</div></div><div class="stat"><div class="stat-label">Qty Needed</div><div class="stat-value">${primaryQty ? primaryQty + ' ' + item.uom : '—'}</div></div></div>${item.secondaryName ? `<div class="secondary-box"><strong>${item.secondaryName}</strong><br>Coverage: ${formatNumber(item.secondaryCoverage, 2)} ${selected.unit} / ${item.secondaryUom}<br>Qty Needed: ${secondaryQty ? secondaryQty + ' ' + item.secondaryUom : '—'}</div>` : ''}</div>`;
+      }).join('')}</div>`;
+    }
+
+    fillSystems();
+    render();
+
+    systemSelect.addEventListener('change', render);
+    measureInput.addEventListener('input', render);
+    editBtn.addEventListener('click', () => {
+      editorPanel.classList.toggle('hidden');
+      editBtn.textContent = editorPanel.classList.contains('hidden') ? 'Edit Coverage Rates' : 'Hide Coverage Editor';
+      render();
+    });
+    resetBtn.addEventListener('click', () => {
+      systems = JSON.parse(JSON.stringify(defaultSystems));
+      saveSystems();
+      fillSystems();
+      render();
+    });
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.classList.remove('hidden');
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBtn.classList.add('hidden');
+    });
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+    }
+  </script>
+</body>
+</html>
